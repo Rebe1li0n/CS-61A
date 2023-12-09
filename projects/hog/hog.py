@@ -22,6 +22,13 @@ def roll_dice(num_rolls, dice=six_sided):
     assert num_rolls > 0, 'Must roll at least once.'
     # BEGIN PROBLEM 1
     "*** YOUR CODE HERE ***"
+    isPigOuted = False
+    scores = 0
+    for _ in range(num_rolls):
+        score = dice()
+        isPigOuted |= True if score == 1 else False
+        scores += score
+    return 1 if isPigOuted else scores
     # END PROBLEM 1
 
 
@@ -33,6 +40,8 @@ def free_bacon(score):
     assert score < 100, 'The game should be over.'
     # BEGIN PROBLEM 2
     "*** YOUR CODE HERE ***"
+    ten_digits, one_digits = (score // 10) % 10, score % 10
+    return 10 + ten_digits - one_digits
     # END PROBLEM 2
 
 
@@ -51,6 +60,10 @@ def take_turn(num_rolls, opponent_score, dice=six_sided):
     assert opponent_score < 100, 'The game should be over.'
     # BEGIN PROBLEM 3
     "*** YOUR CODE HERE ***"
+    if num_rolls == 0:
+        return free_bacon(opponent_score)
+    else:
+        return roll_dice(num_rolls, dice)
     # END PROBLEM 3
 
 
@@ -60,6 +73,9 @@ def is_swap(player_score, opponent_score):
     """
     # BEGIN PROBLEM 4
     "*** YOUR CODE HERE ***"
+    opponent_one, opponent_ten = opponent_score % 10, (opponent_score // 10) % 10
+    my_one = player_score % 10
+    return abs(opponent_one - my_one) == opponent_ten
     # END PROBLEM 4
 
 
@@ -100,6 +116,29 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     who = 0  # Who is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
+    def play_one_turn(my, opponent, my_strategy):
+        """Simulate one turn in a play and return scores of with both Players, with
+        current player's score first, opponent player's score second
+        """
+        num_rolls = my_strategy(my, opponent)
+        my += take_turn(num_rolls, opponent, dice)
+        if is_swap(my, opponent):
+            my, opponent = opponent, my
+        return my, opponent
+
+    def is_game_end(my, opponent):
+        """
+        Judge whether the game terminated or not
+        """
+        return my >= goal or opponent >= goal
+    while not is_game_end(score0, score1):
+        if who == 0:
+            score0, score1 = play_one_turn(score0, score1, strategy0)
+        else:
+            score1, score0 = play_one_turn(score1, score0, strategy1)
+        who = other(who)
+    return score0, score1
+
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
     # BEGIN PROBLEM 6

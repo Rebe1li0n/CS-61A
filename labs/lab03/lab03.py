@@ -12,6 +12,14 @@ def pascal(row, column):
     3
     """
     "*** YOUR CODE HERE ***"
+    if column > row:
+        return 0
+    elif column == row:
+        return 1
+
+    if column == 0:
+        return 1
+    return pascal(row - 1, column - 1) + pascal(row - 1, column)
 
 
 def compose1(f, g):
@@ -40,6 +48,12 @@ def repeated(f, n):
     True
     """
     "*** YOUR CODE HERE ***"
+    if n == 0:
+        return lambda x: x
+    elif n == 1:
+        return f
+    else:
+        return compose1(f, repeated(f, n - 1))
 
 
 def num_eights(x):
@@ -64,6 +78,9 @@ def num_eights(x):
     True
     """
     "*** YOUR CODE HERE ***"
+    if x == 0:
+        return 0
+    return (1 if x % 10 == 8 else 0) + num_eights(x // 10)
 
 
 def pingpong(n):
@@ -99,4 +116,36 @@ def pingpong(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    """
+    reference answer:
+
+    def helper(i, state, direction):
+        if i == n:
+            return state
+        if num_eights(i) != 0 or i % 8 == 0:
+            return helper(i + 1, state - direction, direction*-1)
+        else:
+            return helper(i + 1, state + direction, direction)
+
+    return helper(1, 1, 1)
+
+    """
+    def get_direct(x, is_add):
+        if x == 0:
+            return 0
+        return (-1 if is_add else 1) + get_direct(x - 1, (not is_add) if is_switch(x - 1) else is_add)
+
+    return get_direct(n, direct_switch_num(n) % 2)
+
+
+def is_switch(n):
+    if n == 0:
+        return False
+    return n % 8 == 0 or num_eights(n) > 0
+
+
+def direct_switch_num(n):
+    if n < 8:
+        return 0
+    return (1 if is_switch(n - 1) else 0) + direct_switch_num(n - 1)
 

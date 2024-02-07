@@ -21,6 +21,10 @@ def composer(func=lambda x: x):
     """
     def func_adder(g):
         "*** YOUR CODE HERE ***"
+        h = lambda x:func(g(x))
+        #def helper(x):
+        #    return func(g(x))
+        return composer(h)
     return func, func_adder
 
 
@@ -43,6 +47,9 @@ def g(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    if n <= 3:
+        return n
+    return g(n - 1) + 2*g(n - 2) + 3*g(n - 3)
 
 def g_iter(n):
     """Return the value of G(n), computed iteratively.
@@ -63,6 +70,12 @@ def g_iter(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    if n <= 3:
+        return n
+    a, b, c, cur = 1, 2, 3, 3
+    while(cur != n):
+        a, b, c, cur = b, c, a*3 + 2*b + c, cur + 1
+    return c
 
 
 def missing_digits(n):
@@ -93,6 +106,14 @@ def missing_digits(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    def helper(n, last):
+        if n == 0:
+            return 0
+        cur_last, mis = n % 10, 0
+        if cur_last != last:
+            mis = last - cur_last - 1
+        return mis + helper(n // 10, cur_last)
+    return helper(n // 10, n % 10)
 
 
 def count_change(total):
@@ -112,7 +133,30 @@ def count_change(total):
     True
     """
     "*** YOUR CODE HERE ***"
-
+    """
+    def helper(n, m):
+        if n == 0:
+            return 1
+        elif n < 0:
+            return 0
+        elif m == 0:
+            return 0
+        else:
+            return helper(n - m, m) + helper(n, m // 2)
+    def get_border(n, border):
+        if n >= border:
+            return n
+        return get_border(n << 1, border)
+    return helper(total, get_border(1, total))
+    """
+    def helper(n, m):
+        if n == 0:
+            return 1
+        elif n < (1 << m):
+            return 0
+        else:
+            return helper(n, m + 1) + helper(n - (1 << m), m)
+    return helper(total, 0)
 
 def print_move(origin, destination):
     """Print instructions to move a disk."""
@@ -161,5 +205,5 @@ def make_anonymous_factorial():
     >>> check(HW_SOURCE_FILE, 'make_anonymous_factorial', ['Assign', 'AugAssign', 'FunctionDef', 'Recursion'])
     True
     """
-    return 'YOUR_EXPRESSION_HERE'
+    return (lambda f: lambda x: f(f, x))(lambda f, x: 1 if x == 1 else mul(x, f(f, sub(x, 1)))) 
 

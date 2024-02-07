@@ -89,6 +89,14 @@ def other(who):
     """
     return 1 - who
 
+def is_feral_hogs(num_rolls, prev_my):
+    """Return whether feral_hogs is happened
+    
+    params:
+        num_rolls:  number of dices current player rolls in this turn
+        prev_my:    base score of current player in last turn
+    """
+    return abs(num_rolls - prev_my) == 2
 
 def silence(score0, score1):
     """Announce nothing (see Phase 2)."""
@@ -116,33 +124,44 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     who = 0  # Who is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
-    def play_one_turn(my, opponent, my_strategy):
+    def play_one_turn(my, opponent, my_strategy, _feral_hogs=False,
+                      prev_my=0):
         """Simulate one turn in a play and return scores of with both Players, with
         current player's score first, opponent player's score second
         """
+        score = 0
         num_rolls = my_strategy(my, opponent)
-        my += take_turn(num_rolls, opponent, dice)
-        if is_swap(my, opponent):
-            my, opponent = opponent, my
-        return my, opponent
+        score += take_turn(num_rolls, opponent, dice)
+        if _feral_hogs and is_feral_hogs(num_rolls, prev_my):
+            score += 3
+        if is_swap(my + score, opponent):
+            my, opponent = opponent, my + score
+        return my, opponent, score
 
     def is_game_end(my, opponent):
         """
         Judge whether the game terminated or not
         """
         return my >= goal or opponent >= goal
-    while not is_game_end(score0, score1):
-        if who == 0:
-            score0, score1 = play_one_turn(score0, score1, strategy0)
-        else:
-            score1, score0 = play_one_turn(score1, score0, strategy1)
-        who = other(who)
-    return score0, score1
-
+    if not feral_hogs:
+        while not is_game_end(score0, score1):
+            if who == 0:
+                score0, score1, _ = play_one_turn(score0, score1, strategy0)
+            else:
+                score1, score0, _ = play_one_turn(score1, score0, strategy1)
+            who = other(who)
+    
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
     # BEGIN PROBLEM 6
-    "*** YOUR CODE HERE ***"
+    else:
+        prev0, prev1 = 0, 0
+        while not is_game_end(score0, score1):
+            if who == 0:
+                score0, score1, prev0 = play_one_turn(score0, score1, strategy0, feral_hogs, prev0)
+            else:
+                score1, score0, prev1 = play_one_turn(score1, score0, strategy1, feral_hogs, prev1)
+            who = other(who)
     # END PROBLEM 6
     return score0, score1
 

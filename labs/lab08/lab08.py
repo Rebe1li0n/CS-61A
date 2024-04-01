@@ -33,4 +33,7 @@ def make_generators_generator(g):
     9
     """
     "*** YOUR CODE HERE ***"
-
+    lst = list(g())
+    l = len(lst)
+    for i in range(1, l + 1):
+        yield iter(lst[:i])
